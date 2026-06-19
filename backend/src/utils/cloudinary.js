@@ -10,8 +10,8 @@ const uploadToCloudinary = async (file, dest) => {
         });
         return result;
     }catch(err){
-        console.error("Error in uploadToCloudinary service:", error);
-        throw error;
+        console.error("Error in uploadToCloudinary service:", err);
+        throw err;
     }
 };
 

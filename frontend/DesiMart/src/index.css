@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-obsidian-darkest: #05070f;
+  --color-obsidian-dark: #090d16;
+  --color-obsidian-card: #111726;
+  --color-obsidian-border: #1d273a;
+  --color-neon-cyan: #00f2fe;
+  --color-neon-blue: #007aff;
+  --color-accent-purple: #8b5cf6;
+  
+  --font-sans: 'Plus Jakarta Sans', 'Outfit', system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-obsidian-darkest);
+    color: #e2e8f0;
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+}
+
+/* Custom Scrollbar for premium feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #05070f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1d273a;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00f2fe;
+}
+
+/* Glassmorphism utility card styles */
+.glass-panel {
+  background: rgba(17, 23, 38, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(29, 39, 58, 0.6);
+}
+
+.glass-panel-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel-hover:hover {
+  background: rgba(17, 23, 38, 0.85);
+  border-color: rgba(0, 242, 254, 0.4);
+  box-shadow: 0 10px 30px -10px rgba(0, 242, 254, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Glow effects */
+.glow-text-cyan {
+  text-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
+}
+
+.glow-btn-cyan {
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
+  transition: all 0.3s ease;
+}
+
+.glow-btn-cyan:hover {
+  box-shadow: 0 0 25px rgba(0, 242, 254, 0.5);
+  transform: scale(1.02);
+}
+
+.glow-border-cyan:focus {
+  border-color: #00f2fe;
+  box-shadow: 0 0 0 2px rgba(0, 242, 254, 0.2);
+}
+
+/* Base custom animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Mesh background for home page hero */
+.neon-mesh-bg {
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.1) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(0, 242, 254, 0.1) 0px, transparent 50%),
+    radial-gradient(at 50% 0%, rgba(0, 122, 255, 0.05) 0px, transparent 40%);
+}

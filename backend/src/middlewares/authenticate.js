@@ -10,6 +10,7 @@ const authenticate = (req, res, next) => {
         req.user = decoded;
         next();
     } catch (error) {
+        console.error("Error in authenticate middleware:", error);
         return res.status(401).json({ message: "Invalid token" });
     }
 };
