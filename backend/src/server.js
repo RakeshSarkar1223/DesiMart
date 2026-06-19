@@ -19,6 +19,8 @@ app.get("/test", (req, res) => {
     res.status(200).json({ message: "API is working!" });
 });
 
+app.use("/api/v1", require("./routes/user.route"));
+
 app.listen(process.env.PORT || 5000, () => {
     console.log(`Server is running on port ${process.env.PORT || 5000}`);
 });

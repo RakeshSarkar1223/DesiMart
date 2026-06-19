@@ -20,7 +20,11 @@ const UserSchema = new mongoose.Schema({
     },
     avatar: {
         url: String,
-        public_id: String,
+        public_id: {
+            type: String,
+            default: ""
+        }
+
     },
     authProvider: {
         type: String,
