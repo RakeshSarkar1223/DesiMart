@@ -3,13 +3,24 @@ import Navbar from './components/Navbar';
 import AuthPortal from './components/AuthModal';
 import Dashboards from './components/Dashboards';
 import { useAuth } from './context/AuthContext';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function App() {
   const { user, loading } = useAuth();
   const [currentView, setCurrentView] = useState('profile'); // 'profile' | 'update_profile'
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  // Check URL parameters for OAuth errors
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const errorParam = params.get('error');
+    if (errorParam) {
+      toast.error(decodeURIComponent(errorParam));
+      // Remove query parameters from url without reloading the page
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   // Reset view to default profile page when user logs out
   useEffect(() => {

@@ -14,12 +14,7 @@ const Router = express.Router();
 Router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 Router.get("/auth/google/callback", 
     passport.authenticate("google", { session: false, failureRedirect: "http://localhost:5173" }),
-    (req, res, next) => {
-        const token = generateToken(req.user);
-        res.cookie("token", token, { httpOnly: true });
-        res.redirect("http://localhost:5173");
-        next();
-    }
+    userControllers.googleLoginUser
 );
 
 Router.post("/register",upload.single("photo"), userControllers.registerUser);

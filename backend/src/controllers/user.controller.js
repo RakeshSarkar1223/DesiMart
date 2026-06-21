@@ -1,10 +1,15 @@
 const userServices = require('../services/user.service');
-
+const validateUser = require('../utils/validator/user.validator');
 
 const registerUser = async (req, res) => {
     try{
         const userData = req.body;
         userData.file = req.file;
+        userData.authProvider = "local";
+        const { error } = validateUser(userData);
+        if (error) {
+            return res.status(400).json({ message: error.details[0].message });
+        }
         const result = await userServices.registerUser(userData);
         res.cookie("token", result.token, { httpOnly: true});
         res.status(201).json(result.user);
@@ -25,6 +30,23 @@ const loginUser = async (req, res) => {
         res.status(401).json({ message: error.message });
     }
 }
+
+const googleLoginUser = async (req, res) => {
+    try{
+        const { error } = validateUser(req.user);
+        if (error) {
+            console.error("Validation error in googleLoginUser:", error.details[0].message);
+            return res.redirect(`http://localhost:5173?error=${encodeURIComponent(error.details[0].message)}`);
+        }
+        const result = await userServices.googleLoginUser(req.user);
+        res.cookie("token", result.token, { httpOnly: true});
+        return res.redirect("http://localhost:5173");
+    }catch(error){
+        console.error("Error in googleLoginUser controller:", error);
+        return res.redirect(`http://localhost:5173?error=${encodeURIComponent(error.message)}`);
+    }
+}
+
 
 const logoutUser = (req, res) => {
     if(!req.cookie?.token) res.status(404).json({message: "User not logged in"})
@@ -58,4 +80,4 @@ const updateUser = async (req, res) => {
     }
 }
 
-module.exports = { registerUser, loginUser, logoutUser, getCurrentUser, updateUser};
+module.exports = { registerUser, loginUser, logoutUser, getCurrentUser, updateUser, googleLoginUser };

@@ -57,6 +57,15 @@ const registerUser = async (userData) => {
 };
 
 
+const googleLoginUser = async (userData) => {
+    try{
+        const token = generateToken(userData);
+        return { message: "User logged in successfully", token, user: userData };
+    }catch(error){
+        console.error("Error in googleLoginUser service:", error);
+        throw error;
+    }
+};
 const loginUser = async (email, password, role) => {
     try{
         const user = await User.findOne({ email });
@@ -131,4 +140,4 @@ const updateUser = async (_id, name, file) => {
 }
 
 
-module.exports = { registerUser, loginUser, getCurrentUser, updateUser};
+module.exports = { registerUser, loginUser, getCurrentUser, updateUser, googleLoginUser};
