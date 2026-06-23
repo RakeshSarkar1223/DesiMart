@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import AuthPortal from './components/AuthModal';
 import Dashboards from './components/Dashboards';
+import ProductList from './components/ProductList';
+import AddProductModal from './components/AddProductModal';
+import CartSidebar from './components/CartSidebar';
 import { useAuth } from './context/AuthContext';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -10,6 +13,20 @@ export default function App() {
   const { user, loading } = useAuth();
   const [currentView, setCurrentView] = useState('profile'); // 'profile' | 'update_profile'
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [showCart, setShowCart] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+
+  // Programmatic navigation helper
+  const navigate = (path) => {
+    window.history.pushState({}, '', path);
+    setCurrentPath(path);
+  };
+
+  const handleProductAdded = () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   // Check URL parameters for OAuth errors
   useEffect(() => {
@@ -22,10 +39,31 @@ export default function App() {
     }
   }, []);
 
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Redirect guest if they try to access /profile
+  useEffect(() => {
+    if (!loading && !user && currentPath === '/profile') {
+      navigate('/');
+      setShowAuthModal(true);
+    }
+  }, [user, loading, currentPath]);
+
   // Reset view to default profile page when user logs out
   useEffect(() => {
     if (!user) {
       setCurrentView('profile');
+      setShowCart(false);
+      if (currentPath === '/profile') {
+        navigate('/');
+      }
     }
   }, [user]);
 
@@ -46,52 +84,84 @@ export default function App() {
       
       {/* Navbar */}
       <Navbar 
-        onNavigateProfile={() => setCurrentView('profile')} 
+        currentPath={currentPath}
+        onNavigate={navigate} 
         onOpenAuth={() => setShowAuthModal(true)}
+        onOpenAddProduct={() => setShowAddProductModal(true)}
+        onOpenCart={() => setShowCart(true)}
       />
 
       {/* Main Content Area */}
-      <main className="flex-grow flex flex-col justify-center py-12 px-4 neon-mesh-bg">
-        {!user ? (
-          
-          /* LOGGED OUT - SIMPLIFIED HOME SCREEN */
-          <div className="flex flex-col items-center justify-center py-24 text-center animate-fade-in">
-            <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-neon-cyan to-neon-blue bg-clip-text text-transparent glow-text-cyan">
-              DesiMart
-            </h1>
-            <p className="mt-3 text-xs text-slate-500 max-w-xs leading-relaxed">
-              Welcome to DesiMart. Please sign in or register using the button in the top-right corner to access your account dashboard.
-            </p>
-          </div>
-
-        ) : (
-          
-          /* LOGGED IN DASHBOARD INTERFACE */
+      <main className="flex-grow flex flex-col justify-start py-12 px-4 neon-mesh-bg">
+        {currentPath === '/profile' && user ? (
           <Dashboards 
             currentView={currentView}
             setCurrentView={setCurrentView}
           />
-
+        ) : (
+          <ProductList 
+            refreshKey={refreshKey} 
+            onOpenAuth={() => setShowAuthModal(true)} 
+            onOpenCart={() => setShowCart(true)} 
+          />
         )}
       </main>
 
-      {/* POPUP MODAL OVERLAY */}
+      {/* POPUP MODAL OVERLAYS */}
       {showAuthModal && !user && (
         <AuthPortal onClose={() => setShowAuthModal(false)} />
       )}
 
-      {/* Footer */}
-      <footer className="border-t border-obsidian-border bg-obsidian-darkest py-6 px-4 text-xs text-slate-500">
-        <div className="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm font-bold text-slate-300">DesiMart</span>
-            <span className="h-1.5 w-1.5 rounded-full bg-neon-cyan"></span>
-            <span className="text-[10px]">Auth Gate Center v1.0</span>
-          </div>
+      {showAddProductModal && user && (
+        <AddProductModal 
+          onClose={() => setShowAddProductModal(false)} 
+          onProductAdded={handleProductAdded} 
+        />
+      )}
 
-          <div className="flex space-x-6 text-[10px]">
-            <span className="text-slate-600">Vite React Frontend</span>
-            <span className="text-slate-600">Node Express Backend</span>
+      {user && (
+        <CartSidebar 
+          isOpen={showCart} 
+          onClose={() => setShowCart(false)} 
+        />
+      )}
+
+      {/* Footer */}
+      <footer className="border-t border-obsidian-border bg-obsidian-darkest/90 py-10 px-4 text-xs text-slate-500">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 border-b border-obsidian-border/50 text-left">
+            <div>
+              <div className="flex items-center space-x-2 mb-3">
+                <span className="text-base font-extrabold text-slate-200">DesiMart</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-neon-cyan animate-pulse"></span>
+              </div>
+              <p className="text-slate-400 max-w-xs leading-relaxed">
+                Your premium destination for authentic Indian products, wellness items, handloom fabrics, and organic groceries.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-300 uppercase tracking-widest text-[10px] mb-3">Sellers</h4>
+              <ul className="space-y-2">
+                <li><span className="hover:text-neon-cyan cursor-pointer transition-colors">Sell on DesiMart</span></li>
+                <li><span className="hover:text-neon-cyan cursor-pointer transition-colors">Merchant Portal Guidelines</span></li>
+                <li><span className="hover:text-neon-cyan cursor-pointer transition-colors">Seller Protection</span></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-300 uppercase tracking-widest text-[10px] mb-3">Customer Service</h4>
+              <ul className="space-y-2">
+                <li><span className="hover:text-neon-cyan cursor-pointer transition-colors">Contact Support</span></li>
+                <li><span className="hover:text-neon-cyan cursor-pointer transition-colors">Terms of Service</span></li>
+                <li><span className="hover:text-neon-cyan cursor-pointer transition-colors">Privacy Policy</span></li>
+              </ul>
+            </div>
+          </div>
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px]">
+            <span>© {new Date().getFullYear()} DesiMart Marketplace. All rights reserved.</span>
+            <div className="flex space-x-4">
+              <span className="text-slate-600">Premium React Frontend</span>
+              <span className="text-slate-600">Secure Express API</span>
+            </div>
           </div>
         </div>
       </footer>

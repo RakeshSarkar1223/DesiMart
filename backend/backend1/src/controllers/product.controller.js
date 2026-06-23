@@ -3,8 +3,15 @@ const validateProduct = require('../utils/validator/product.validator');
 
 const createProduct = async (req, res) => {
     try {
-        const { _id} = req.user;
+        const _id = req.user._id || req.user.id;
         req.body.seller = _id; // Associate product with the authenticated user
+        
+        if (req.files && req.files.length > 0) {
+            req.body.images = req.files;
+        } else {
+            req.body.images = [];
+        }
+
         const { error } = validateProduct(req.body);
         if (error) {
             return res.status(400).json({ error: error.details[0].message });
@@ -19,7 +26,7 @@ const createProduct = async (req, res) => {
 
 const updateProduct = async (req, res) => {
     try {
-        const { _id} = req.user;
+        const _id = req.user._id || req.user.id;
         // req.body.seller = _id; // Associate product with the authenticated user
         const product = await productServices.updateProduct(req.params.id, req.body, _id);
         res.status(200).json(product);
@@ -30,7 +37,7 @@ const updateProduct = async (req, res) => {
 
 const deleteProduct = async (req, res) => {
     try {
-        const { _id} = req.user;
+        const _id = req.user._id || req.user.id;
         await productServices.deleteProduct(req.params.id, _id);
         res.status(200).json({ message: "Product deleted successfully" });
     } catch (error) {
@@ -58,11 +65,12 @@ const getAllProducts = async (req, res) => {
 
 const getProductsBySeller = async (req, res) => {
     try {
-        const { _id} = req.user;
+        const _id = req.user._id || req.user.id;
         const products = await productServices.getProductsBySeller(_id);
         res.status(200).json(products);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        console.error(error);
+        res.status(400).json({ error: "Error fetching products" });
     }
 }
 

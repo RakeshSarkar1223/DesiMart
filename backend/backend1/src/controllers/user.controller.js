@@ -4,6 +4,21 @@ const validateUser = require('../utils/validator/user.validator');
 const registerUser = async (req, res) => {
     try{
         const userData = req.body;
+        
+        // Ensure role is formatted as an array for validation
+        if (userData.role) {
+            if (typeof userData.role === 'string') {
+                try {
+                    const parsed = JSON.parse(userData.role);
+                    userData.role = Array.isArray(parsed) ? parsed : [userData.role];
+                } catch (e) {
+                    userData.role = [userData.role];
+                }
+            } else if (!Array.isArray(userData.role)) {
+                userData.role = [userData.role];
+            }
+        }
+
         userData.file = req.file;
         userData.authProvider = "local";
         const { error } = validateUser(userData);

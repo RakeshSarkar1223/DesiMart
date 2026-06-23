@@ -1,10 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
-export default function Navbar({ onNavigateProfile, onOpenAuth }) {
+export default function Navbar({ currentPath, onNavigate, onOpenAuth, onOpenAddProduct, onOpenCart }) {
   const { user, logout } = useAuth();
+  const { cartCount } = useCart();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  const isSeller = user && (Array.isArray(user.role) ? user.role.includes('seller') : user.role === 'seller');
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -25,25 +29,58 @@ export default function Navbar({ onNavigateProfile, onOpenAuth }) {
         <div className="flex h-16 items-center justify-between">
           
           {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-neon-cyan to-neon-blue bg-clip-text text-transparent glow-text-cyan">
+          <button 
+            onClick={() => onNavigate('/')}
+            className="flex items-center space-x-2 focus:outline-none cursor-pointer group text-left"
+          >
+            <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-neon-cyan to-neon-blue bg-clip-text text-transparent glow-text-cyan group-hover:opacity-90 transition-opacity">
               DesiMart
             </span>
             <span className="h-2 w-2 rounded-full bg-neon-cyan animate-pulse"></span>
             <span className="hidden sm:inline-block text-[10px] text-slate-500 uppercase tracking-widest pl-2 border-l border-obsidian-border font-semibold">
-              Auth Center
+              E-Commerce Store
             </span>
-          </div>
+          </button>
 
           {/* Right Section: Authentication / Profile Dropdown or Login button */}
           <div className="flex items-center space-x-4">
+            {isSeller && (
+              <button
+                type="button"
+                onClick={onOpenAddProduct}
+                className="flex items-center space-x-1.5 rounded-lg bg-gradient-to-r from-accent-purple to-neon-blue px-3 py-1.5 sm:px-3.5 sm:py-2 text-[10px] sm:text-xs font-bold text-slate-100 hover:opacity-90 transition-all glow-btn-cyan cursor-pointer"
+              >
+                <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Add Product</span>
+              </button>
+            )}
+
+            {user && (
+              <button
+                type="button"
+                onClick={onOpenCart}
+                className="relative p-2 text-slate-400 hover:text-neon-cyan transition-colors rounded-full hover:bg-slate-900/50 cursor-pointer border border-transparent hover:border-obsidian-border"
+                title="Open Cart"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                {cartCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-pink-600 text-[9px] font-black text-white shadow-md shadow-red-500/20">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            )}
+
             {user ? (
               <div className="relative" ref={dropdownRef}>
                 {/* Profile Trigger Button */}
                 <button
                   onClick={() => {
                     setDropdownOpen(!dropdownOpen);
-                    onNavigateProfile();
                   }}
                   className="flex items-center space-x-2 focus:outline-none cursor-pointer group p-1 rounded-full hover:bg-slate-900/50 transition-all border border-transparent hover:border-obsidian-border"
                 >
@@ -96,7 +133,7 @@ export default function Navbar({ onNavigateProfile, onOpenAuth }) {
                       <button
                         onClick={() => {
                           setDropdownOpen(false);
-                          onNavigateProfile();
+                          onNavigate('/profile');
                         }}
                         className="w-full text-left px-2 py-1.5 hover:bg-slate-800/40 rounded text-xs text-slate-300 hover:text-neon-cyan transition-colors font-medium flex items-center gap-2 cursor-pointer"
                       >
