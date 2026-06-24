@@ -13,5 +13,5 @@ Router.put("/:id", authenticate, authorize("seller"), upload.array("photos"), pr
 Router.delete("/:id", authenticate, authorize("seller"), productControllers.deleteProduct);
 Router.get("/seller", authenticate, authorize("seller"), productControllers.getProductsBySeller);
 Router.get("/:id", authenticate, authorize("seller"), productControllers.getProductById);
-
+Router.post("/buy", productControllers.decreaseProductQuantity)
 module.exports = Router;
